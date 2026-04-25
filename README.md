@@ -1,7 +1,7 @@
 # IRON GARAGE
 
 > **An interactive digital showroom for the most iconic cars in Fast & Furious history.**
-> Built with pure HTML, CSS, and JavaScript — no frameworks, no BS.
+> Built with pure HTML, CSS, and JavaScript no frameworks, no BS.
 
 <br>
 
