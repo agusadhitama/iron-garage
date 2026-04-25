@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IRON GARAGE - by Agus Satria Adhitama</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --card: #121212;
+    --border: #1e1e1e;
+    --border-bright: #2e2e2e;
+    --accent: #ff1a1a;
+    --accent2: #ff7700;
+    --accent3: #ffe600;
+    --neon: #ff1a1a;
+    --text: #ffffff;
+    --text-sec: #cccccc;
+    --muted: #888888;
+    --dim: #2a2a2a;
+    --gold: #e0b84a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor-dot {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.08s, background 0.2s, width 0.2s, height 0.2s;
+    box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(255,26,26,0.5);
+  }
+  .cursor-ring {
+    position: fixed; width: 32px; height: 32px;
+    border: 1.5px solid var(--accent2);
+    border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%);
+    transition: all 0.18s cubic-bezier(0.25,0.46,0.45,0.94);
+    box-shadow: 0 0 8px rgba(255,119,0,0.4);
+  }
+  .cursor-dot.hovered { width: 14px; height: 14px; background: var(--accent2); }
+  .cursor-ring.hovered { width: 50px; height: 50px; border-color: var(--accent); border-width: 1px; }
+
+  /* ── NOISE OVERLAY ── */
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9990; opacity: 0.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(8,8,8,0.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s;
+  }
+  header.scrolled { border-color: var(--accent); box-shadow: 0 0 20px rgba(255,26,26,0.1); }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 6px;
+    color: #ffffff;
+  }
+  .logo span { color: var(--accent); text-shadow: 0 0 12px rgba(255,26,26,0.6); }
+
+  nav { display: flex; gap: 32px; }
+  nav a {
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: #aaaaaa; text-decoration: none;
+    transition: color 0.2s, text-shadow 0.2s;
+    font-weight: 600;
+  }
+  nav a:hover { color: var(--accent2); text-shadow: 0 0 8px rgba(255,119,0,0.5); }
+
+  .credit-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: var(--gold);
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(224,184,74,0.4);
+  }
+
+  /* HERO */
+  .hero {
+    height: 100vh; position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 60%, rgba(232,35,42,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(255,107,0,0.05) 0%, transparent 60%),
+      linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
+  }
+
+  .hero-lines {
+    position: absolute; inset: 0; overflow: hidden;
+  }
+  .hero-lines::before, .hero-lines::after {
+    content: ''; position: absolute;
+    background: linear-gradient(to right, transparent, var(--accent), transparent);
+    height: 1px; width: 100%;
+    animation: scan 4s linear infinite;
+    opacity: 0.15;
+  }
+  .hero-lines::before { animation-delay: 0s; }
+  .hero-lines::after { animation-delay: 2s; }
+  @keyframes scan {
+    0% { top: -1px; }
+    100% { top: 101%; }
+  }
+
+  .speed-lines {
+    position: absolute; inset: 0; overflow: hidden;
+  }
+  .speed-line {
+    position: absolute; height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,107,0,0.3), transparent);
+    animation: speedLine 1.5s linear infinite;
+    opacity: 0;
+  }
+  @keyframes speedLine {
+    0% { left: -100%; opacity: 0; width: 30%; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: 100%; opacity: 0; width: 60%; }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; letter-spacing: 5px;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 14vw, 180px);
+    line-height: 0.9;
+    text-align: center;
+    letter-spacing: 4px;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+  .hero-title .line2 {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(240,240,240,0.3);
+  }
+  .hero-title .line3 { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px; letter-spacing: 4px;
+    color: #aaaaaa; text-transform: uppercase;
+    margin-top: 24px; text-align: center;
+    animation: fadeUp 0.8s ease 0.7s both;
+  }
+
+  .hero-scroll {
+    position: absolute; bottom: 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: fadeUp 0.8s ease 1s both;
+  }
+  .hero-scroll span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 3px; color: #aaaaaa;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.1); }
+  }
+
+  .hero-rpm {
+    position: absolute; right: 48px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 4px;
+    animation: fadeUp 0.8s ease 0.9s both;
+  }
+  .rpm-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px; color: #aaaaaa;
+    text-align: right;
+  }
+  .rpm-bars {
+    display: flex; gap: 3px; align-items: flex-end; height: 60px;
+  }
+  .rpm-bar {
+    width: 4px; background: var(--dim); border-radius: 2px;
+    animation: rpmPulse 1.5s ease-in-out infinite;
+  }
+  .rpm-bar:nth-child(1) { height: 20%; animation-delay: 0.0s; }
+  .rpm-bar:nth-child(2) { height: 40%; animation-delay: 0.1s; }
+  .rpm-bar:nth-child(3) { height: 65%; animation-delay: 0.2s; background: var(--accent2); }
+  .rpm-bar:nth-child(4) { height: 80%; animation-delay: 0.3s; background: var(--accent2); }
+  .rpm-bar:nth-child(5) { height: 100%; animation-delay: 0.4s; background: var(--accent); }
+  .rpm-bar:nth-child(6) { height: 80%; animation-delay: 0.5s; background: var(--accent2); }
+  .rpm-bar:nth-child(7) { height: 60%; animation-delay: 0.6s; }
+  .rpm-bar:nth-child(8) { height: 35%; animation-delay: 0.7s; }
+  @keyframes rpmPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION */
+  section { padding: 100px 48px; }
+
+  .section-header {
+    display: flex; align-items: baseline; gap: 20px;
+    margin-bottom: 60px;
+  }
+  .section-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; color: var(--accent); letter-spacing: 2px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; letter-spacing: 3px;
+  }
+  .section-line {
+    flex: 1; height: 1px; background: var(--border);
+    margin-left: 20px;
+  }
+
+  /* ── CAR GRID ── */
+  .cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 3px;
+  }
+
+  .car-card {
+    background: var(--card);
+    border: 1px solid var(--border-bright);
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .car-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(255,26,26,0.12), inset 0 0 30px rgba(255,26,26,0.03);
+  }
+
+  .car-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,26,26,0.06), transparent 60%);
+    opacity: 0; transition: opacity 0.3s; z-index: 1;
+    pointer-events: none;
+  }
+  .car-card:hover::before { opacity: 1; }
+
+  .car-visual {
+    height: 220px; position: relative; overflow: hidden;
+    background: #0f0f0f;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .car-emoji-wrap {
+    font-size: 80px;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 30px rgba(232,35,42,0.3));
+  }
+  .car-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: brightness(0.85) contrast(1.1);
+  }
+  .car-card:hover .car-img {
+    transform: scale(1.06);
+    filter: brightness(1) contrast(1.1);
+  }
+  .car-card:hover .car-emoji-wrap {
+    transform: scale(1.1) translateX(8px);
+  }
+
+  .car-visual-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(232,35,42,0.06) 0%, transparent 70%);
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
+  .car-card:hover .car-visual-bg { opacity: 1; }
+
+  .car-num {
+    position: absolute; top: 16px; left: 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: rgba(255,255,255,0.12);
+    line-height: 1; user-select: none; z-index: 2;
+  }
+
+  .car-tag {
+    position: absolute; top: 16px; right: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    padding: 4px 10px;
+    background: var(--accent);
+    color: #ffffff;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 0 12px rgba(255,26,26,0.5);
+  }
+
+  .car-info {
+    padding: 24px;
+    border-top: 1px solid var(--border-bright);
+    background: linear-gradient(180deg, #141414, #111111);
+  }
+
+  .car-character {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: var(--accent2);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 4px;
+    text-shadow: 0 0 8px rgba(255,119,0,0.4);
+  }
+
+  .car-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 2px;
+    line-height: 1; margin-bottom: 8px;
+    color: #ffffff;
+  }
+
+  .car-film {
+    font-size: 13px; color: #999999;
+    letter-spacing: 1px; margin-bottom: 16px;
+  }
+
+  .car-specs {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; margin-bottom: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-bright);
+    border-bottom: 1px solid var(--border-bright);
+  }
+  .spec-item {}
+  .spec-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; color: #ffffff; letter-spacing: 1px;
+  }
+  .spec-unit { color: var(--accent2); font-size: 13px; }
+  .spec-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: #888888; letter-spacing: 1px;
+  }
+
+  .car-bar-wrap {
+    height: 3px; background: #1e1e1e; margin-bottom: 16px;
+    border-radius: 2px;
+  }
+  .car-bar {
+    height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--accent2), var(--accent3));
+    width: 0; transition: width 1s ease;
+    border-radius: 2px;
+    box-shadow: 0 0 6px rgba(255,119,0,0.4);
+  }
+
+  .car-desc {
+    font-size: 14px; line-height: 1.7;
+    color: #aaaaaa; letter-spacing: 0.3px;
+  }
+
+  /* ── FEATURED ── */
+  .featured-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px; margin-bottom: 3px;
+  }
+
+  .car-card.featured { grid-column: span 2; }
+  .car-card.featured .car-visual { height: 320px; }
+  .car-card.featured .car-name { font-size: 42px; }
+
+  /* ── STATS STRIP ── */
+  .stats-strip {
+    background: #0c0c0c;
+    border-top: 1px solid var(--border-bright);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 40px 48px;
+    display: flex; justify-content: space-around;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 60px; letter-spacing: 2px; color: #ffffff;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(255,26,26,0.3);
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 3px; color: #999999;
+    text-transform: uppercase; margin-top: 4px;
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border-bright);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 14px 0;
+    background: #0a0a0a;
+  }
+  .marquee-track {
+    display: flex; width: max-content;
+    animation: marquee 30s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px; letter-spacing: 4px;
+    color: #777777; padding: 0 40px;
+    white-space: nowrap;
+  }
+  .marquee-item span { color: var(--accent); }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── SECTION ── */
+  section { padding: 100px 48px; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 20px;
+    margin-bottom: 60px;
+  }
+  .section-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; color: var(--accent); letter-spacing: 2px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; letter-spacing: 3px; color: #ffffff;
+  }
+  .section-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    margin-left: 20px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 60px 48px 40px;
+    border-top: 1px solid var(--border-bright);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    background: #060606;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; letter-spacing: 6px;
+    color: rgba(255,255,255,0.05);
+  }
+  .footer-credit { text-align: right; }
+  .footer-credit .name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 3px; color: var(--gold);
+    text-shadow: 0 0 10px rgba(224,184,74,0.3);
+  }
+  .footer-credit .role {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: #888888; letter-spacing: 2px;
+  }
+  .footer-credit .year {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: #555555; letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    header { padding: 14px 20px; }
+    nav { display: none; }
+    section { padding: 60px 20px; }
+    .stats-strip { padding: 30px 20px; gap: 20px; flex-wrap: wrap; }
+    .hero-rpm { display: none; }
+    footer { padding: 40px 20px 30px; flex-direction: column; gap: 20px; }
+    .footer-credit { text-align: left; }
+    .cars-grid { grid-template-columns: 1fr; }
+    .featured-row { grid-template-columns: 1fr; }
+    .car-card.featured { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="logo">IRON<span>GARAGE</span></div>
+  <nav>
+    <a href="#garage">Garage</a>
+    <a href="#stats">Stats</a>
+    <a href="#about">About</a>
+  </nav>
+  <div class="credit-badge">// AGS.DEV</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="speed-lines" id="speedLines"></div>
+
+  <div class="hero-eyebrow">EST. LOS ANGELES - BUILT FOR SPEED</div>
+  <h1 class="hero-title">
+    <div>THE</div>
+    <div class="line2">IRON</div>
+    <div class="line3">GARAGE</div>
+  </h1>
+  <p class="hero-sub">Iconic Cinema Cars - Engineered in Code</p>
+
+  <div class="hero-rpm">
+    <div class="rpm-label">ENGINE OUTPUT</div>
+    <div class="rpm-bars">
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+      <div class="rpm-bar"></div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip" id="stats">
+  <div class="stat-item">
+    <div class="stat-num"><span>10</span></div>
+    <div class="stat-label">Iconic Cars</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num"><span>11</span></div>
+    <div class="stat-label">F&F Films</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num"><span>7B+</span></div>
+    <div class="stat-label">Box Office</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num"><span>∞</span></div>
+    <div class="stat-label">Nitrous Left</div>
+  </div>
+</div>
+
+<!-- GARAGE -->
+<section id="garage">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">THE COLLECTION</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="featured-row">
+    <div class="car-card featured reveal" data-power="85">
+      <div class="car-visual">
+        <div class="car-visual-bg"></div>
+        <div class="car-num">01</div>
+        <div class="car-tag">LEGEND</div>
+        <img class="car-img" src="images/charger.jpg" alt="1970 Dodge Charger R/T">
+      </div>
+      <div class="car-info">
+        <div class="car-character">Dominic Toretto</div>
+        <div class="car-name">1970 Dodge Charger R/T</div>
+        <div class="car-film">Fast &amp; Furious (2001-2023) · Dom's Signature Ride</div>
+        <div class="car-specs">
+          <div class="spec-item"><div class="spec-val">900<span class="spec-unit">hp</span></div><div class="spec-label">Power</div></div>
+          <div class="spec-item"><div class="spec-val">4.2<span class="spec-unit">s</span></div><div class="spec-label">0–60mph</div></div>
+          <div class="spec-item"><div class="spec-val">150<span class="spec-unit">mph</span></div><div class="spec-label">Top Speed</div></div>
+        </div>
+        <div class="car-bar-wrap"><div class="car-bar"></div></div>
+        <div class="car-desc">The beating heart of the franchise. Dom's black Charger is muscle, menace, and mythology rolled into one. Modified beyond street-legal, it's been launched off cliffs, flipped, destroyed and always resurrected. Family runs on Mopar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cars-grid" id="carsGrid"></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">ABOUT THIS BUILD</h2>
+    <div class="section-line"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;" class="reveal">
+    <div>
+      <p style="font-size:16px;line-height:1.8;color:#aaaaaa;letter-spacing:0.5px;">
+        <strong style="color:#ffffff;font-size:18px;">IRON GARAGE</strong> is an interactive digital showroom dedicated to the most iconic cars in cinema history with a special love for the Fast &amp; Furious franchise.<br><br>
+        Built entirely with vanilla HTML, CSS, and JavaScript. No frameworks, no dependencies just raw code and speed.<br><br>
+        Every detail from the scan line animations to the neon cursor was handcrafted to reflect the raw, visceral energy of these machines.
+      </p>
+    </div>
+    <div style="border-left:1px solid #2e2e2e;padding-left:40px;">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;">TECH STACK</div>
+        <div style="font-size:15px;color:#aaaaaa;">HTML5 · CSS3 · Vanilla JS<br>Google Fonts · No Libraries</div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;">Instagram</div>
+        <div style="font-size:15px;color:#aaaaaa;">@agusadhitamaa</div>
+      </div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;">BUILT BY</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:3px;text-shadow:0 0 10px rgba(224,184,74,0.3);">Agus Satria Adhitama</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">IRON GARAGE</div>
+  <div class="footer-credit">
+    <div class="name">Agus Satria Adhitama</div>
+    <div class="role">// TROUBLE MAKER · CAR ENTHUSIAST</div>
+    <div class="year">© 2026 · ALL RIGHTS RESERVED</div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+// ── CURSOR ──
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a, .car-card, button').forEach(el => {
+  el.addEventListener('mouseenter', () => { dot.classList.add('hovered'); ring.classList.add('hovered'); });
+  el.addEventListener('mouseleave', () => { dot.classList.remove('hovered'); ring.classList.remove('hovered'); });
+});
+
+// Speed lines in hero
+const sl = document.getElementById('speedLines');
+for (let i = 0; i < 12; i++) {
+  const line = document.createElement('div');
+  line.className = 'speed-line';
+  line.style.top = (Math.random() * 100) + '%';
+  line.style.animationDelay = (Math.random() * 3) + 's';
+  line.style.animationDuration = (1 + Math.random() * 2) + 's';
+  sl.appendChild(line);
+}
+
+// Marquee content
+const marqueeItems = ['DODGE CHARGER', 'TOYOTA SUPRA', 'NISSAN SKYLINE', 'HONDA CIVIC', 'FORD MUSTANG', 'MITSUBISHI ECLIPSE', 'MAZDA RX-7', 'SUBARU IMPREZA', 'PONTIAC GTO', 'CHEVY CORVETTE'];
+const mTrack = document.getElementById('marquee');
+let mContent = '';
+for (let i = 0; i < 4; i++) {
+  marqueeItems.forEach(item => {
+    mContent += `<div class="marquee-item">${item} <span>◆</span></div>`;
+  });
+}
+mTrack.innerHTML = mContent;
+
+// Cars data
+const cars = [
+  {
+    num: '02', img: 'images/supra.jpg', tag: 'ICONIC',
+    character: 'Brian O\'Conner', name: '1994 Toyota Supra MK4',
+    film: 'The Fast and the Furious (2001)',
+    hp: '550', accel: '4.0', speed: '160',
+    power: 78,
+    desc: 'The orange Supra - arguably the most famous car in the franchise. Brian rebuilt it from junk parts into a 10-second street legend. This twin-turbo screamer became the face of tuner culture worldwide.'
+  },
+  {
+    num: '03', img: 'images/barracuda.jpg', tag: 'TUNER',
+    character: 'Letty Ortiz', name: '1970 Plymouth Barracuda',
+    film: 'Fast & Furious (2009)',
+    hp: '800', accel: '4.8', speed: '155',
+    power: 72,
+    desc: 'Letty\'s Barracuda - a brutalist slab of American muscle with attitude to match its driver. Wide body, slammed suspension, and a supercharged V8 that punishes anyone who underestimates it.'
+  },
+  {
+    num: '04', img: 'images/jetta.jpg', tag: 'STREET',
+    character: 'Jesse', name: '1995 Volkswagen Jetta',
+    film: 'The Fast and the Furious (2001)',
+    hp: '200', accel: '7.2', speed: '130',
+    power: 45,
+    desc: 'The underdog Jetta - proof that you don\'t need V8 power to race. Jesse\'s nitrous-pumped front-wheel-drive Jetta was a fan favorite, though it couldn\'t outrun its fate.'
+  },
+  {
+    num: '05', img: 'images/eclipse.jpg', tag: 'MUSCLE',
+    character: 'Roman Pearce', name: '2003 Mitsubishi Eclipse',
+    film: '2 Fast 2 Furious (2003)',
+    hp: '350', accel: '5.1', speed: '145',
+    power: 60,
+    desc: 'Roman\'s purple Eclipse - flashy, loud, and as confident as its driver. The wide-body kit and purple pearl paint made it one of the most visually memorable cars from Miami\'s neon-soaked streets.'
+  },
+  {
+    num: '06', img: 'images/rx7.jpg', tag: 'DRIFT',
+    character: 'Han Lue', name: '2006 Mazda RX-7',
+    film: 'The Fast and the Furious: Tokyo Drift (2006)',
+    hp: '400', accel: '4.5', speed: '155',
+    power: 70,
+    desc: 'Han\'s Mazda RX-7 is pure rotary soul. A car that matched its owner perfectly - understated, precise, and devastatingly quick. The Tokyo drift sequences in this machine are cinematic gold.'
+  },
+  {
+    num: '07', img: 'images/charger-daytona.jpg', tag: 'CLASSIC',
+    character: 'Dom & Letty', name: '1969 Dodge Charger Daytona',
+    film: 'Fast & Furious 6 (2013)',
+    hp: '840', accel: '4.3', speed: '158',
+    power: 80,
+    desc: 'The winged widow - built for the Talladega Superspeedway and repurposed as Dom\'s tank-stopper. That nose cone and towering spoiler make it the most dramatic-looking car in the entire franchise.'
+  },
+  {
+    num: '08', img: 'images/lykan.jpg', tag: 'HYPERCAR',
+    character: 'Tej Parker', name: 'Lykan HyperSport',
+    film: 'Furious 7 (2015)',
+    hp: '780', accel: '2.8', speed: '245',
+    power: 95,
+    desc: 'The $3.4 million Lykan HyperSport - the car that flew between Abu Dhabi skyscrapers. One of only 7 ever made, with headlights set with actual diamonds. The most expensive car ever used in the franchise.'
+  },
+  {
+    num: '09', img: 'images/sykline.jpg', tag: 'TUNER',
+    character: 'Brian O\'Conner', name: '1999 Nissan Skyline GT-R R34',
+    film: '2 Fast 2 Furious (2003)',
+    hp: '600', accel: '3.8', speed: '175',
+    power: 88,
+    desc: 'The forbidden fruit - Japan\'s most wanted, officially illegal on US roads. Brian\'s blue Skyline with the BAILE livery is a JDM legend. RB26 under the hood, ATTESA all-wheel drive, and a legacy bigger than any engine number.'
+  }
+];
+
+// Render cars
+const grid = document.getElementById('carsGrid');
+cars.forEach(car => {
+  const card = document.createElement('div');
+  card.className = 'car-card reveal';
+  card.setAttribute('data-power', car.power);
+  card.innerHTML = `
+    <div class="car-visual">
+      <div class="car-visual-bg"></div>
+      <div class="car-num">${car.num}</div>
+      <div class="car-tag">${car.tag}</div>
+      <img class="car-img" src="${car.img}" alt="${car.name}">
+    </div>
+    <div class="car-info">
+      <div class="car-character">${car.character}</div>
+      <div class="car-name">${car.name}</div>
+      <div class="car-film">${car.film}</div>
+      <div class="car-specs">
+        <div class="spec-item"><div class="spec-val">${car.hp}<span class="spec-unit">hp</span></div><div class="spec-label">Power</div></div>
+        <div class="spec-item"><div class="spec-val">${car.accel}<span class="spec-unit">s</span></div><div class="spec-label">0–60mph</div></div>
+        <div class="spec-item"><div class="spec-val">${car.speed}<span class="spec-unit">mph</span></div><div class="spec-label">Top Speed</div></div>
+      </div>
+      <div class="car-bar-wrap"><div class="car-bar"></div></div>
+      <div class="car-desc">${car.desc}</div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+// Scroll reveal + bar animation
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+        const bar = entry.target.querySelector('.car-bar');
+        if (bar) {
+          const power = entry.target.getAttribute('data-power');
+          setTimeout(() => { bar.style.width = power + '%'; }, 300);
+        }
+      }, 80 * (Array.from(entry.target.parentElement.children).indexOf(entry.target)));
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Header scroll state
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
