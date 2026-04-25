@@ -107,4 +107,4 @@ iron-garage/
 
 ---
 
-<p align="center">Made with ❤️ and lots of nitrous 🔴</p>
+<p align="center">Made with ❤️ and lots of nitrous</p>
